@@ -1,0 +1,46 @@
+pragma solidity >=0.7.0;
+
+// Bank contract for customer operations
+contract Bank {
+    mapping(address => uint) public user_account;
+    mapping(address => bool) public user_exist;
+
+    // Create a new bank account with an initial deposit
+    function create_account() public payable returns(string memory) {
+        require(user_exist[msg.sender] == false, "Account Already created!");
+        user_account[msg.sender] = msg.value;  // Deposit initial funds
+        user_exist[msg.sender] = true;
+        return "Account created";
+    }
+
+    // Deposit money to an existing account
+    function deposit() public payable returns(string memory) {
+        require(user_exist[msg.sender] == true, "Account not created!");
+        require(msg.value > 0, "Amount should be greater than 0");
+        user_account[msg.sender] += msg.value;
+        return "Amount deposited successfully";
+    }
+
+    // Withdraw money from an existing account
+    function withdraw(uint amount) public returns(string memory) {
+        require(user_exist[msg.sender] == true, "Account not created!");
+        require(amount > 0, "Amount should be greater than 0");
+        require(user_account[msg.sender] >= amount, "Insufficient funds");
+        
+        // Transfer the amount to the sender
+        payable(msg.sender).transfer(amount);
+        user_account[msg.sender] -= amount;
+        
+        return "Amount withdrawn successfully";
+    }
+
+    // Get the account balance of the sender
+    function account_balance() public view returns(uint) {
+        return user_account[msg.sender];
+    }
+
+    // Check if the account exists
+    function account_exists() public view returns(bool) {
+        return user_exist[msg.sender];
+    }
+}
